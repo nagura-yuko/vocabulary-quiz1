@@ -16,6 +16,13 @@ fetch('/csv_files')
         return response.json();
     })
     .then(csvFiles => {
+        // 数字が含まれるファイル名をソート
+        csvFiles.sort((a, b) => {
+            const numA = parseInt(a.match(/\d+/));
+            const numB = parseInt(b.match(/\d+/));
+            return numA - numB;
+        });
+
         const fileButtonsDiv = document.getElementById('fileButtons');
         csvFiles.forEach((file, index) => {
             const button = document.createElement('button');
@@ -190,7 +197,8 @@ function resetQuiz() {
     // クイズ選択画面に戻す
     document.getElementById('quizContent').style.display = 'none';  // 出題画面を非表示
     document.querySelector('h1').style.display = 'block';  // クイズファイル選択画面の文言を再表示
-    document.getElementById('fileButtons').style.display = 'block';  // クイズファイル選択画面を再表示
+    document.getElementById('fileButtons').style.display = 'flex';  // クイズファイル選択画面を再表示
+    document.getElementById('fileButtons').style.justifyContent = 'center';  // 中央揃えを再適用
 
     // 再チャレンジボタンを非表示
     const restartBtn = document.getElementById('restartBtn');

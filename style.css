@@ -6,11 +6,11 @@ body {
     color: #333;
     display: flex;
     flex-direction: column;
-    align-items: center; /* 中央揃え */
+    align-items: center;
     justify-content: center;
     min-height: 100vh;
-    user-select: none; /* テキスト選択を無効化 */
-    -webkit-tap-highlight-color: transparent; /* タッチ時のハイライトを透明に */
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* 中央揃え用クラス */
@@ -18,32 +18,32 @@ body {
     display: flex;
     justify-content: center;
     margin-bottom: 20px;
-    width: 100%; /* 幅を100%にして、中央揃えを安定させる */
+    width: 100%;
     text-align: center;
 }
 
 /* 見出しのスタイル */
 h1 {
     color: #333;
-    font-size: 36px; /* 見出しを大きく */
+    font-size: 36px;
     text-align: center;
     margin-bottom: 30px;
 }
 
 /* ボタンの基本スタイル */
 button {
-    padding: 20px 30px; /* ボタンを大きく */
+    padding: 20px 30px;
     margin: 10px;
     border: none;
-    border-radius: 10px; /* ボタンに角丸をつける */
-    font-size: 24px; /* 文字サイズを大きくして見やすく */
+    border-radius: 10px;
+    font-size: 24px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s ease; /* 背景色と押された感のアニメーション */
+    transition: background-color 0.3s ease, transform 0.1s ease;
 }
 
 /* ボタンを押した時のフィードバック */
 button:active {
-    transform: scale(0.95); /* ボタンが押された感を出す */
+    transform: scale(0.95);
 }
 
 /* ボタンホバー効果 */
@@ -54,14 +54,14 @@ button:hover {
 /* ファイル選択ボタンのカスタマイズ */
 #fileButtons {
     display: flex;
-    flex-wrap: wrap; /* 横並びで、画面サイズに合わせて折り返す */
-    justify-content: center; /* 横並びに中央揃え */
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 10px;
     width: 100%;
 }
 
 #fileButtons button {
-    width: 200px; /* ボタンの幅を統一 */
+    width: 200px;
     text-align: center;
 }
 
@@ -72,22 +72,22 @@ button:hover {
 }
 
 #question {
-    font-size: 28px; /* クイズの質問も大きく */
+    font-size: 28px;
     margin-bottom: 15px;
 }
 
 /* 強調表示する単語のスタイル */
 .highlight-word {
-    font-weight: bold; /* 太字にする */
-    font-size: 36px; /* 文字サイズをさらに大きく */
-    background-color: #ffff99; /* マーカーのような背景色を追加 */
-    padding: 5px; /* 背景色との余白 */
-    border-radius: 5px; /* マーカー部分に角丸をつける */
+    font-weight: bold;
+    font-size: 36px;
+    background-color: #ffff99;
+    padding: 5px;
+    border-radius: 5px;
 }
 
 #choices button {
-    width: 300px; /* 選択肢ボタンの幅を統一 */
-    margin: 10px; /* ボタンの間に余白を追加 */
+    width: 300px;
+    margin: 10px;
     padding: 15px;
     font-size: 24px;
     background-color: #28a745;
@@ -129,8 +129,8 @@ th, td {
     border-radius: 10px;
     cursor: pointer;
     display: block;
-    margin: 20px auto; /* 自動で中央揃え */
-    position: relative; /* 位置を相対的に */
+    margin: 20px auto;
+    position: relative;
 }
 
 /* 再チャレンジボタン */
@@ -142,7 +142,7 @@ th, td {
     border: none;
     border-radius: 10px;
     cursor: pointer;
-    margin-bottom: 20px; /* 下に余白を追加 */
+    margin-bottom: 20px;
 }
 
 #restartBtn:hover {
@@ -152,35 +152,35 @@ th, td {
 /* ====== iPad対応のレスポンシブデザイン ====== */
 @media screen and (max-width: 768px) {
     body {
-        font-size: 18px; /* 全体のフォントサイズを調整 */
+        font-size: 18px;
         padding: 10px;
     }
 
     #question {
-        font-size: 22px; /* クイズの質問も少し小さく */
+        font-size: 22px;
     }
 
     .highlight-word {
-        font-size: 28px; /* 単語のサイズを少し調整 */
+        font-size: 28px;
         padding: 3px;
     }
 
     #choices button {
-        width: 90%; /* ボタン幅を画面幅に合わせて広げる */
+        width: 90%;
         font-size: 22px;
         padding: 10px;
     }
 
     #fileButtons button {
-        width: 90%; /* モバイル時にボタン幅を画面幅に合わせる */
+        width: 90%;
     }
 
     #pronounceBtn, #restartBtn {
-        width: 90%; /* ボタン幅を画面幅に合わせる */
+        width: 90%;
         font-size: 22px;
     }
 
     h1 {
-        font-size: 28px; /* 見出しを少し小さく */
+        font-size: 28px;
     }
 }
