@@ -3,6 +3,7 @@ let currentQuestionIndex = 0;
 let correctCount = 0;
 let incorrectCount = 0;
 let incorrectWords = [];
+let isRetryMode = false;  // 間違った問題を再チャレンジするモード
 
 // カラフルなボタン用の色リスト
 const buttonColors = ["#FF5733", "#33FF57", "#3357FF", "#F39C12", "#8E44AD", "#1ABC9C", "#E74C3C", "#3498DB"];
@@ -16,7 +17,6 @@ fetch('/csv_files')
         return response.json();
     })
     .then(csvFiles => {
-        // 数字が含まれるファイル名をソート
         csvFiles.sort((a, b) => {
             const numA = parseInt(a.match(/\d+/));
             const numB = parseInt(b.match(/\d+/));
@@ -37,32 +37,32 @@ fetch('/csv_files')
     });
 
 function loadQuizFile(fileName) {
-    console.log("選択されたファイル:", fileName);  // ファイル名をログに出力
+    console.log("選択されたファイル:", fileName);
     fetch(`/csv/${fileName}`)
         .then(response => {
-            console.log("CSVファイルをフェッチ中...");  // フェッチ処理の開始をログ
             if (!response.ok) {
                 throw new Error(`ファイル ${fileName} の読み込みに失敗しました`);
             }
             return response.text();
         })
         .then(data => {
-            console.log("CSVデータを取得しました:", data);  // CSVデータをログに出力
             const workbook = XLSX.read(data, {type: 'binary'});
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
             const jsonData = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
 
             parseData(jsonData);
 
+            console.log("CSVデータが読み込まれました: ", jsonData);  // デバッグ: 読み込んだデータを表示
+
             // クイズファイル選択画面を非表示にし、出題画面に遷移
             document.getElementById('fileButtons').style.display = 'none';
             document.querySelector('h1').style.display = 'none';
             document.getElementById('quizContent').style.display = 'block';
 
-            console.log("出題画面に遷移しました");  // 出題画面に遷移したことを確認
-
-            shuffle(words);
-            showQuestion();  // 最初の問題を表示
+            if (!isRetryMode) {
+                shuffle(words);
+            }
+            showQuestion();
         })
         .catch(error => {
             console.error(`ファイル ${fileName} の読み込み中にエラーが発生しました:`, error);
@@ -71,13 +71,42 @@ function loadQuizFile(fileName) {
 
 function parseData(data) {
     words = data.slice(1).map(row => ({
+        questionNumber: row[0],
         wordOptions: [
-            { word: row[0], choice: row[1], furigana: row[2] },  // word1, choice1, furigana1
-            { word: row[3], choice: row[4], furigana: row[5] },  // word2, choice2, furigana2
-            { word: row[6], choice: row[7], furigana: row[8] },  // word3, choice3, furigana3
-            { word: row[9], choice: row[10], furigana: row[11] } // word4, choice4, furigana4
+            { word: row[1], choice: row[2], furigana: row[3] },
+            { word: row[4], choice: row[5], furigana: row[6] },
+            { word: row[7], choice: row[8], furigana: row[9] },
+            { word: row[10], choice: row[11], furigana: row[12] }
         ]
     }));
+
+    console.log("問題データがパースされました: ", words);  // デバッグ: パースされた問題データを表示
+}
+
+function retryQuiz() {
+    if (incorrectWords.length > 0) {
+        isRetryMode = true;
+
+        // 間違った問題とその選択肢を使って再出題
+        words = incorrectWords.map(item => {
+            console.log("Retrying with the following incorrect question: ", item);
+            return {
+                questionNumber: "",  // 再チャレンジ時は問題番号は不要
+                wordOptions: item.wordOptions,  // 保存された選択肢をそのまま使用
+                word: item.word,  // 正しい単語を再度設定
+                correctChoice: item.correctChoice  // 正しい答えも再設定
+            };
+        });
+
+        incorrectWords = [];  // リセット
+        currentQuestionIndex = 0;
+        correctCount = 0;
+        incorrectCount = 0;
+        document.getElementById('result').innerHTML = '';  // 結果表示をクリア
+        showQuestion();  // 再度問題を表示
+    } else {
+        resetQuiz();  // 不正解問題がない場合はクイズをリセット
+    }
 }
 
 function showQuestion() {
@@ -88,37 +117,35 @@ function showQuestion() {
 
     const questionElement = document.getElementById('question');
     const choiceButtonsContainer = document.getElementById('choices');
-    choiceButtonsContainer.innerHTML = '';  // 選択肢をクリア
+    choiceButtonsContainer.innerHTML = '';
     const currentWordOptions = words[currentQuestionIndex].wordOptions;
 
-    // ランダムにword1〜word4から1つを選んで出題
-    const randomWord = currentWordOptions[Math.floor(Math.random() * 4)];
+    // もし retryMode の場合、選ばれた不正解問題の単語をそのまま表示する
+    const randomWord = isRetryMode ? words[currentQuestionIndex].word : currentWordOptions[Math.floor(Math.random() * 4)].word;
 
-    // 問題を表示
-    questionElement.innerHTML = `What is the meaning of "<span class="highlight-word">${randomWord.word}</span>"?`;
-    questionElement.style.display = 'block';  // 問題文を表示
+    // 問題を表示 (retryMode でも通常モードでも正しく表示)
+    questionElement.innerHTML = `What is the meaning of "<span class="highlight-word">${randomWord}</span>"?`;
+    questionElement.style.display = 'block';
 
-    // 発音ボタンに機能を追加
+    // 発音ボタンを再表示
     const pronounceBtn = document.getElementById('pronounceBtn');
     pronounceBtn.style.display = 'block';
-    pronounceBtn.onclick = () => pronounceWord(randomWord.word);
+    pronounceBtn.onclick = () => pronounceWord(randomWord);
 
-    const correctChoice = randomWord.choice;
-    const shuffledChoices = shuffle([...currentWordOptions]);
+    const correctChoice = isRetryMode ? words[currentQuestionIndex].correctChoice : currentWordOptions.find(opt => opt.word === randomWord).choice;
 
-    shuffledChoices.forEach(choice => {
+    // ふりがなと選択肢を表示
+    currentWordOptions.forEach(choice => {
         const button = document.createElement('button');
         if (choice.furigana && choice.furigana !== "") {
             button.innerHTML = `<ruby>${choice.choice}<rt>${choice.furigana}</rt></ruby>`;
         } else {
             button.textContent = choice.choice;
         }
-
-        button.style.margin = '10px'; // 選択肢ボタンの間に隙間を追加
-        button.onclick = () => checkAnswer(choice.choice, correctChoice, randomWord.word);
+        button.onclick = () => checkAnswer(choice.choice, correctChoice, randomWord);
         choiceButtonsContainer.appendChild(button);
     });
-    choiceButtonsContainer.style.display = 'block';  // 選択肢を表示
+    choiceButtonsContainer.style.display = 'block';
 }
 
 function checkAnswer(selectedChoice, correctChoice, word) {
@@ -126,7 +153,22 @@ function checkAnswer(selectedChoice, correctChoice, word) {
         correctCount++;
     } else {
         incorrectCount++;
-        incorrectWords.push({ word: word, correctChoice: correctChoice });
+        // 元の選択肢を保持して、間違えた問題として保存する
+        const originalWordOptions = words[currentQuestionIndex].wordOptions;
+
+        // コンソールで保存する問題と選択肢を確認
+        console.log("Saving incorrect question: ", {
+            word: word,
+            correctChoice: correctChoice,
+            wordOptions: originalWordOptions
+        });
+
+        // 間違った問題を保存 (単語、正しい選択肢、全ての選択肢を保持)
+        incorrectWords.push({
+            word: word,
+            correctChoice: correctChoice,
+            wordOptions: originalWordOptions
+        });
     }
 
     currentQuestionIndex++;
@@ -136,15 +178,12 @@ function checkAnswer(selectedChoice, correctChoice, word) {
 function showResults() {
     document.getElementById('question').style.display = 'none';
     document.getElementById('choices').style.display = 'none';
-    document.getElementById('pronounceBtn').style.display = 'none';
+    document.getElementById('pronounceBtn').style.display = 'none';  // 発音ボタンも非表示に
 
     const resultElement = document.getElementById('result');
-    resultElement.innerHTML = '';
-
-    // 結果の表示をテーブル形式に変更
     resultElement.innerHTML = `
         <div class="centered">
-            <button id="restartBtn" style="display: block;">再チャレンジ</button>
+            <button id="retryBtn" style="display: block;">再度回答する</button>
         </div>
         <table>
             <tr>
@@ -178,35 +217,63 @@ function showResults() {
         });
         incorrectTable += `</table>`;
         resultElement.innerHTML += incorrectTable;
+    } else {
+        resultElement.innerHTML += `
+            <div class="centered">
+                <button id="nextQuizBtn" style="display: block;">他の問題にチャレンジする</button>
+            </div>
+        `;
+
+        const nextQuizBtn = document.getElementById('nextQuizBtn');
+        nextQuizBtn.onclick = resetQuiz;
     }
 
-    // 再チャレンジボタンにクリックイベントを設定
-    const restartBtn = document.getElementById('restartBtn');
-    restartBtn.onclick = resetQuiz;
+    const retryBtn = document.getElementById('retryBtn');
+    retryBtn.onclick = retryQuiz;
+}
+
+function retryQuiz() {
+    if (incorrectWords.length > 0) {
+        isRetryMode = true;
+
+        // 間違った問題とその選択肢を使って再出題
+        words = incorrectWords.map(item => {
+            console.log("Retrying with the following incorrect question: ", item);
+            return {
+                questionNumber: "",  // 再チャレンジ時は問題番号は不要
+                wordOptions: item.wordOptions,  // 保存された選択肢をそのまま使用
+                word: item.word,  // 正しい単語を再度設定
+                correctChoice: item.correctChoice  // 正しい答えも再設定
+            };
+        });
+
+        incorrectWords = [];  // リセット
+        currentQuestionIndex = 0;
+        correctCount = 0;
+        incorrectCount = 0;
+        document.getElementById('result').innerHTML = '';  // 結果表示をクリア
+        showQuestion();  // 再度問題を表示
+    } else {
+        resetQuiz();  // 不正解問題がない場合はクイズをリセット
+    }
 }
 
 function resetQuiz() {
+    isRetryMode = false;
     currentQuestionIndex = 0;
     correctCount = 0;
     incorrectCount = 0;
     incorrectWords = [];
 
-    // 結果表示をクリア
-    document.getElementById('result').textContent = '';
-
     // クイズ選択画面に戻す
-    document.getElementById('quizContent').style.display = 'none';  // 出題画面を非表示
-    document.querySelector('h1').style.display = 'block';  // クイズファイル選択画面の文言を再表示
+    document.getElementById('quizContent').style.display = 'none';
+    document.querySelector('h1').style.display = 'block';
     document.getElementById('fileButtons').style.display = 'flex';  // クイズファイル選択画面を再表示
     document.getElementById('fileButtons').style.justifyContent = 'center';  // 中央揃えを再適用
 
-    // 再チャレンジボタンを非表示
-    const restartBtn = document.getElementById('restartBtn');
-    if (restartBtn) {
-        restartBtn.style.display = 'none';  // 再チャレンジボタンを非表示
-    }
+    const resultElement = document.getElementById('result');
+    resultElement.innerHTML = '';  // 結果表示をクリア
 
-    // 発音ボタンと問題文、選択肢を非表示にしてリセット
     const question = document.getElementById('question');
     if (question) {
         question.style.display = 'none';  // 問題文を非表示
@@ -224,6 +291,7 @@ function resetQuiz() {
     }
 }
 
+// シャッフル関数
 function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -232,10 +300,11 @@ function shuffle(array) {
     return array;
 }
 
+// 発音機能
 function pronounceWord(word) {
     const synth = window.speechSynthesis;
     const utterThis = new SpeechSynthesisUtterance(word);
-    utterThis.lang = 'en-US';
+    utterThis.lang = 'en-US';  // 英語の発音設定
     synth.speak(utterThis);
 }
 
@@ -245,11 +314,11 @@ document.addEventListener('DOMContentLoaded', function() {
     buttons.forEach(button => {
         // touchstartイベントで反応させ、クリックの遅延を防ぐ
         button.addEventListener('touchstart', handleButtonPress, { passive: true });
-        button.addEventListener('click', handleButtonPress); // fallback for non-touch devices
+        button.addEventListener('click', handleButtonPress);  // タッチデバイス以外用
     });
 });
 
 function handleButtonPress(event) {
-    event.preventDefault(); // タッチのデフォルトアクションを防止
-    // ボタンが押されたときの処理をここで記述
+    event.preventDefault();  // タッチのデフォルトアクションを防止
+    // ボタンが押されたときの処理を記述
 }

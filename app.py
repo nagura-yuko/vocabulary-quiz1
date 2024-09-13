@@ -47,6 +47,11 @@ def service_worker():
 def favicon():
     return send_from_directory('.', 'favicon.ico')
 
+# imageディレクトリの画像ファイルを提供するルート
+@app.route('/image/<path:filename>')
+def image_files(filename):
+    return send_from_directory('image', filename)
+
 # HerokuまたはRenderが提供するポートにバインドするための設定
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))  # HerokuやRenderが指定するポートを取得

@@ -1,0 +1,16 @@
+﻿question_number,word1,choice1,furigana1,word2,choice2,furigana2,word3,choice3,furigana3,word4,choice4,furigana4
+1,happy,幸せ,しあわせ,sad,悲しい,かなしい,big,大きい,おおきい,small,小さい,ちいさい
+2,beautiful,美しい,うつくしい,ugly,醜い,みにくい,fast,速い,はやい,slow,遅い,おそい
+3,difficult,難しい,むずかしい,easy,簡単,かんたん,clean,清潔な,せいけつな,dirty,汚い,きたない
+4,long,長い,ながい,short,短い,みじかい,tall,背が高い,せがたかい,short,背が低い,せがひくい
+5,interesting,面白い,おもしろい,boring,退屈な,たいくつな,strong,強い,つよい,weak,弱い,よわい
+6,important,重要,じゅうよう,unimportant,重要でない,じゅうようでない,kind,親切な,しんせつな,mean,意地悪な,いじわるな
+7,expensive,高価な,こうかな,cheap,安い,やすい,high,高い,たかい,low,低い,ひくい
+8,old,古い,ふるい,new,新しい,あたらしい,large,広い,ひろい,narrow,狭い,せまい
+9,noisy,騒がしい,さわがしい,quiet,静かな,しずかな,hot,暑い,あつい,cold,寒い,さむい
+10,delicious,美味しい,おいしい,bad-tasting,不味い,まずい,busy,忙しい,いそがしい,free,暇な,ひまな
+11,friendly,友好的,ゆうこうてき,unfriendly,不友好的,ふゆうこうてき,safe,安全な,あんぜんな,dangerous,危険な,きけんな
+12,smart,賢い,かしこい,dumb,愚か,おろか,brave,勇敢な,ゆうかんな,cowardly,臆病な,おくびょうな
+13,rich,裕福な,ゆうふくな,poor,貧しい,まずしい,hungry,空腹な,くうふくな,full,満腹な,まんぷくな
+14,comfortable,快適な,かいてきな,uncomfortable,不快な,ふかいな,dark,暗い,くらい,bright,明るい,あかるい
+15,lucky,幸運な,こううんな,unlucky,不運な,ふうんな,polite,礼儀正しい,れいぎただしい,rude,失礼な,しつれいな

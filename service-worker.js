@@ -5,8 +5,8 @@ const urlsToCache = [
   "/style.css",
   "/script.js",
   "/manifest.json",
-  "/images/icon-192x192.png",
-  "/images/icon-512x512.png"
+  "/image/icon-192x192.png",  // パス修正
+  "/image/icon-512x512.png"   // パス修正
 ];
 
 // インストール時にキャッシュを作成
@@ -14,7 +14,9 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log("Opened cache");
-      return cache.addAll(urlsToCache);
+      return cache.addAll(urlsToCache).catch((error) => {
+        console.error("Failed to cache resources:", error);  // エラーハンドリング追加
+      });
     })
   );
 });
@@ -23,7 +25,9 @@ self.addEventListener("install", (event) => {
 self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
+      return response || fetch(event.request).catch((error) => {
+        console.error("Failed to fetch resource:", error);  // フェッチエラー時のハンドリング
+      });
     })
   );
 });
